@@ -1,6 +1,12 @@
 export const getPosts = (req, res, next) => {
   res.status(200).json({
-    posts: [{ title: "First post", content: "This is a first post!" }],
+    posts: [
+      {
+        title: "First post",
+        content: "This is a first post!",
+        imageUrl: "images/UFC-belt.jpg",
+      },
+    ],
   });
 };
 
