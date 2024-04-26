@@ -5,7 +5,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import multer from "multer";
-import uuid from "uuid";
+import { v4 as uuid } from "uuid";
 
 import connect from "./config/mongo.js";
 import feedRoutes from "./routes/feed.js";
