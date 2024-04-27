@@ -1,7 +1,12 @@
 import express from "express";
 import { body } from "express-validator";
 
-import { getPosts, createPost, getPost } from "../controllers/index.js";
+import {
+  getPosts,
+  createPost,
+  getPost,
+  updatePost,
+} from "../controllers/index.js";
 
 const router = express.Router();
 
@@ -17,5 +22,14 @@ router.post(
 );
 
 router.get("/post/:postId", getPost);
+
+router.put(
+  "/post/:postId",
+  [
+    body("title").trim().isLength({ min: 5 }),
+    body("content").trim().isLength({ min: 5 }),
+  ],
+  updatePost
+);
 
 export default router;
