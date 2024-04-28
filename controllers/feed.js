@@ -6,9 +6,21 @@ import { validationResult } from "express-validator";
 import Post from "..//models/post.js";
 
 export const getPosts = (req, res, next) => {
+  const currentPage = req.params.page || 1;
+  const perPage = 2;
+  let totalItems;
   Post.find()
+    .countDocuments()
+    .then((count) => {
+      totalItems = count;
+      return Post.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    })
     .then((posts) => {
-      res.status(200).json({ message: "Posts fetched successfully.", posts });
+      res
+        .status(200)
+        .json({ message: "Posts fetched successfully.", posts, totalItems });
     })
     .catch((err) => {
       if (!err.statusCode) {
@@ -113,6 +125,31 @@ export const updatePost = (req, res, next) => {
     })
     .then((result) => {
       res.status(200).json({ message: "Post updated!", post: result });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+export const deletePost = (req, res, next) => {
+  const postId = req.params.postId;
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Could not find post.");
+        error.statusCode = 404;
+        throw error;
+      }
+      // todo: check logged in user
+      clearImage(post.imageUrl);
+      return Post.findByIdAndDelete(postId);
+    })
+    .then((result) => {
+      console.log(result);
+      res.status(200).json({ message: "Deleted post." });
     })
     .catch((err) => {
       if (!err.statusCode) {
