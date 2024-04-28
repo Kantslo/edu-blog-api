@@ -6,6 +6,7 @@ import {
   createPost,
   getPost,
   updatePost,
+  deletePost,
 } from "../controllers/index.js";
 
 const router = express.Router();
@@ -31,5 +32,7 @@ router.put(
   ],
   updatePost
 );
+
+router.delete("/post/:postId", deletePost);
 
 export default router;
