@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+
 import { validationResult } from "express-validator";
 
 import Post from "..//models/post.js";
@@ -100,6 +103,9 @@ export const updatePost = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
+      if (imageUrl !== post.imageUrl) {
+        clearImage(post.imageUrl);
+      }
       post.title = title;
       imageUrl.title = imageUrl;
       imageUrl.content = content;
@@ -114,4 +120,11 @@ export const updatePost = (req, res, next) => {
       }
       next(err);
     });
+};
+
+const clearImage = (filePath) => {
+  filePath = path.join(__dirname, "../", filePath);
+  fs.unlink(filePath, (err) => {
+    console.log(err);
+  });
 };
