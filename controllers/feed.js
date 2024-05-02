@@ -3,7 +3,8 @@ import path from "path";
 
 import { validationResult } from "express-validator";
 
-import Post from "..//models/post.js";
+import Post from "../models/post.js";
+import User from "../models/user.js";
 
 export const getPosts = (req, res, next) => {
   const currentPage = req.params.page || 1;
@@ -45,19 +46,29 @@ export const createPost = (req, res, next) => {
   const imageUrl = req.file.path;
   const title = req.body.title;
   const content = req.body.content;
+  let creator;
   const post = new Post({
     title,
     content,
     imageUrl,
-    creator: { name: "Giorgi" },
+    creator: req.userId,
   });
 
   post
     .save()
     .then((result) => {
+      User.findById(req.userId);
+    })
+    .then((user) => {
+      creator = user;
+      user.posts.push(post);
+      return user.save();
+    })
+    .then((result) => {
       res.status(201).json({
         message: "Post created successfully",
         post: result,
+        creator: { _id: creator._id, name: creator.name },
       });
     })
     .catch((err) => {
