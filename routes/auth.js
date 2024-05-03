@@ -2,7 +2,13 @@ import express from "express";
 import { body } from "express-validator";
 
 import User from "../models/user.js";
-import { signup, login } from "../controllers/index.js";
+import {
+  signup,
+  login,
+  getUserStatus,
+  updateUserStatus,
+} from "../controllers/index.js";
+import isAuth from "../middlewares/is-auth.js";
 
 const router = express.Router();
 
@@ -27,5 +33,14 @@ router.put(
 );
 
 router.post("/login", login);
+
+router.get("/status", isAuth, getUserStatus);
+
+router.patch(
+  "/status",
+  isAuth,
+  [body("status").trim().not().isEmpty()],
+  updateUserStatus
+);
 
 export default router;
