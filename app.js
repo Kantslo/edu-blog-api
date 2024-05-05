@@ -6,6 +6,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import multer from "multer";
 import { v4 as uuid } from "uuid";
+import { Server } from "socket.io";
 
 import connect from "./config/mongo.js";
 
@@ -55,4 +56,9 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message, data });
 });
 
-app.listen(8080);
+const server = app.listen(8080);
+const io = new Server(server);
+
+io.on("connection", (socket) => {
+  console.log("Client connected.");
+});
