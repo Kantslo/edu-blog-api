@@ -6,12 +6,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import multer from "multer";
 import { v4 as uuid } from "uuid";
-import { Server } from "socket.io";
 
 import connect from "./config/mongo.js";
 
 import feedRoutes from "./routes/feed.js";
 import authRoutes from "./routes/auth.js";
+import { init } from "./socket.js";
 
 dotenv.config();
 connect();
@@ -57,8 +57,4 @@ app.use((err, req, res, next) => {
 });
 
 const server = app.listen(8080);
-const io = new Server(server);
-
-io.on("connection", (socket) => {
-  console.log("Client connected.");
-});
+init(server);
