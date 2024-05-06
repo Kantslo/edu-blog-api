@@ -5,6 +5,7 @@ import { validationResult } from "express-validator";
 
 import Post from "../models/post.js";
 import User from "../models/user.js";
+import { getIO } from "../socket.js";
 
 export const getPosts = async (req, res, next) => {
   const currentPage = req.params.page || 1;
@@ -55,7 +56,7 @@ export const createPost = async (req, res, next) => {
     const user = User.findById(req.userId);
     user.posts.push(post);
     await user.save();
-
+    getIO().emit("posts", { action: "create", post });
     res.status(201).json({
       message: "Post created successfully",
       post,
