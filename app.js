@@ -9,10 +9,6 @@ import { v4 as uuid } from "uuid";
 
 import connect from "./config/mongo.js";
 
-import feedRoutes from "./routes/feed.js";
-import authRoutes from "./routes/auth.js";
-import { init } from "./socket.js";
-
 dotenv.config();
 connect();
 
@@ -45,9 +41,6 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use(cors());
 
-app.use("/feed", feedRoutes);
-app.use("/auth", authRoutes);
-
 app.use((err, req, res, next) => {
   console.log(err);
   const status = err.statusCode || 500;
@@ -56,5 +49,4 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message, data });
 });
 
-const server = app.listen(8080);
-init(server);
+app.listen(8080);
