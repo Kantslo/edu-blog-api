@@ -6,6 +6,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import multer from "multer";
 import { v4 as uuid } from "uuid";
+import { graphqlHTTP } from "express-graphql";
+
+import { schema, resolver } from "./graphql";
 
 import connect from "./config/mongo.js";
 
@@ -40,6 +43,14 @@ app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use(cors());
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: schema,
+    rootValue: resolver,
+  })
+);
 
 app.use((err, req, res, next) => {
   console.log(err);
