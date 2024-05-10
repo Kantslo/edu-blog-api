@@ -1,4 +1,4 @@
-import schema from "./schema";
-import resolver from "./resolvers.js";
+import schema from "./schema.js";
+import resolvers from "./resolvers.js";
 
-export { schema, resolver };
+export { schema, resolvers };
