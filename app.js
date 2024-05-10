@@ -8,7 +8,7 @@ import multer from "multer";
 import { v4 as uuid } from "uuid";
 import { graphqlHTTP } from "express-graphql";
 
-import { schema, resolver } from "./graphql";
+import { schema, resolvers } from "./graphql/index.js";
 
 import connect from "./config/mongo.js";
 
@@ -40,7 +40,7 @@ const fileFilter = (req, file, cb) => {
 
 app.use(bodyParser.json());
 app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
-app.use("/images", express.static(path.join(__dirname, "images")));
+app.use("/images", express.static(path.join(path.resolve("images"))));
 
 app.use(cors());
 
@@ -48,7 +48,7 @@ app.use(
   "/graphql",
   graphqlHTTP({
     schema: schema,
-    rootValue: resolver,
+    rootValue: resolvers,
   })
 );
 
