@@ -42,7 +42,11 @@ app.use(bodyParser.json());
 app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
 app.use("/images", express.static(path.join(path.resolve("images"))));
 
-app.use(cors());
+app.use(
+  cors({
+    optionsSuccessStatus: 200,
+  })
+);
 
 app.use(
   "/graphql",
@@ -50,6 +54,19 @@ app.use(
     schema: schema,
     rootValue: resolvers,
     graphiql: true,
+    formatError: (err) => {
+      if (!err.originalError) {
+        return err;
+      }
+      const data = err.originalError.data;
+      const message = err.message || "An error occurred.";
+      const code = err.originalError.code || 500;
+      return {
+        message,
+        status: code,
+        data,
+      };
+    },
   })
 );
 
