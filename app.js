@@ -9,6 +9,7 @@ import { v4 as uuid } from "uuid";
 import { graphqlHTTP } from "express-graphql";
 
 import { schema, resolvers } from "./graphql/index.js";
+import auth from "./middlewares/auth.js";
 
 import connect from "./config/mongo.js";
 
@@ -47,6 +48,8 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
+
+app.use(auth);
 
 app.use(
   "/graphql",
