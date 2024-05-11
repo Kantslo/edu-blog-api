@@ -18,6 +18,8 @@ const resolvers = {
     }
     if (errors.length > 0) {
       const error = new Error("Invalid input.");
+      error.data = errors;
+      error.code = 422;
       throw error;
     }
     const existingUser = await User.findOne({ email });
