@@ -65,6 +65,11 @@ const resolvers = {
     };
   },
   createPost: async (args, req) => {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated!");
+      error.code = 401;
+      throw error;
+    }
     const { title, content, imageUrl } = args.postInput;
     const errors = [];
 
@@ -83,12 +88,21 @@ const resolvers = {
       error.code = 422;
       throw error;
     }
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error("Invalid user.");
+      error.code = 401;
+      throw error;
+    }
     const post = new Post({
       title,
       content,
       imageUrl,
+      creator: user,
     });
     const createdPost = await post.save();
+    user.posts.push(createdPost);
+    await user.save();
     return {
       ...createdPost._doc,
       _id: createdPost._id.toString(),
