@@ -3,6 +3,7 @@ import validator from "validator";
 import jwt from "jsonwebtoken";
 
 import User from "../models/user.js";
+import Post from "../models/post.js";
 
 const resolvers = {
   createUser: async (args, req) => {
@@ -61,6 +62,38 @@ const resolvers = {
     return {
       token,
       userId: user._id.toString(),
+    };
+  },
+  createPost: async (args, req) => {
+    const { title, content, imageUrl } = args.postInput;
+    const errors = [];
+
+    if (validator.isEmpty(title) || !validator.isLength(title, { min: 5 })) {
+      errors.push({ message: "Title is invalid." });
+    }
+    if (
+      validator.isEmpty(content) ||
+      !validator.isLength(content, { min: 5 })
+    ) {
+      errors.push({ message: "Content is invalid" });
+    }
+    if (errors.length > 0) {
+      const error = new Error("Invalid input.");
+      error.data = errors;
+      error.code = 422;
+      throw error;
+    }
+    const post = new Post({
+      title,
+      content,
+      imageUrl,
+    });
+    const createdPost = await post.save();
+    return {
+      ...createdPost._doc,
+      _id: createdPost._id.toString(),
+      createdAt: createdPost.createdAt.toISOString(),
+      updatedAt: createdPost.updatedAt.toISOString(),
     };
   },
 };
