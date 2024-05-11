@@ -38,7 +38,7 @@ const resolvers = {
     return { ...createdUser._doc, _id: createdUser._id.toString() };
   },
   login: async ({ email, password }, req) => {
-    const user = await User.findOne(email);
+    const user = await User.findOne({ email });
     if (!user) {
       const error = new Error("User not found.");
       error.code = 401;
