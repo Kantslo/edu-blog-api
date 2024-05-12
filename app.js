@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 
 import express from "express";
 import bodyParser from "body-parser";
@@ -51,6 +52,21 @@ app.use(
 
 app.use(auth);
 
+app.put("/post-image", (req, res, next) => {
+  if (!req.isAuth) {
+    throw new Error("Not authenticated!");
+  }
+  if (!req.file) {
+    return res.status(200).json({ message: "No file provided!" });
+  }
+  if (req.body.oldPath) {
+    clearImage(req.body.oldPath);
+  }
+  return res
+    .status(201)
+    .json({ message: "File stored", filePath: req.file.path });
+});
+
 app.use(
   "/graphql",
   graphqlHTTP({
@@ -82,3 +98,8 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(8080);
+
+const clearImage = (filePath) => {
+  filePath = path.join(path.resolve("..", filePath));
+  fs.unlink(filePath, (err) => console.log(err));
+};
