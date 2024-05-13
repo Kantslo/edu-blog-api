@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 
 import User from "../models/user.js";
 import Post from "../models/post.js";
+import { clearImage } from "../util/file.js";
 
 const resolvers = {
   createUser: async (args, req) => {
@@ -38,6 +39,7 @@ const resolvers = {
     const createdUser = await user.save();
     return { ...createdUser._doc, _id: createdUser._id.toString() };
   },
+
   login: async ({ email, password }, req) => {
     const user = await User.findOne({ email });
     if (!user) {
@@ -64,6 +66,7 @@ const resolvers = {
       userId: user._id.toString(),
     };
   },
+
   createPost: async (args, req) => {
     if (!req.isAuth) {
       const error = new Error("Not authenticated!");
@@ -110,6 +113,7 @@ const resolvers = {
       updatedAt: createdPost.updatedAt.toISOString(),
     };
   },
+
   posts: async ({ page }, req) => {
     if (!req.isAuth) {
       const error = new Error("Not authenticated!");
@@ -139,6 +143,7 @@ const resolvers = {
       totalPosts,
     };
   },
+
   post: async ({ id }, req) => {
     if (!req.isAuth) {
       const error = new Error("Not authenticated!");
@@ -158,6 +163,7 @@ const resolvers = {
       updatedAt: post.updatedAt.toISOString(),
     };
   },
+
   updatePost: async (args, req) => {
     const { title, content, imageUrl } = args.postInput;
     const id = args.id;
@@ -205,6 +211,31 @@ const resolvers = {
       createdAt: updatedPost.createdAt.toISOString(),
       updatedAt: updatedPost.updatedAt.toISOString(),
     };
+  },
+
+  deletePost: async ({ id }, req) => {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated!");
+      error.code = 401;
+      throw error;
+    }
+    const post = await Post.findById(id);
+    if (!post) {
+      const error = new Error("No post found!");
+      error.code = 404;
+      throw error;
+    }
+    if (post.creator.toString() !== req.userId.toString()) {
+      const error = new Error("Not authorized!");
+      error.code = 403;
+      throw error;
+    }
+    clearImage(post.imageUrl);
+    await Post.findByIdAndDelete(id);
+    const user = await User.findById(req.userId);
+    user.posts.pull(id);
+    await user.save();
+    return true;
   },
 };
 
