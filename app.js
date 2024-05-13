@@ -1,5 +1,4 @@
 import path from "path";
-import fs from "fs";
 
 import express from "express";
 import bodyParser from "body-parser";
@@ -11,6 +10,7 @@ import { graphqlHTTP } from "express-graphql";
 
 import { schema, resolvers } from "./graphql/index.js";
 import auth from "./middlewares/auth.js";
+import { clearImage } from "./util/file.js";
 
 import connect from "./config/mongo.js";
 
@@ -98,8 +98,3 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(8080);
-
-const clearImage = (filePath) => {
-  filePath = path.join(path.resolve("..", filePath));
-  fs.unlink(filePath, (err) => console.log(err));
-};
