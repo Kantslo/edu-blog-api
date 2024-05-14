@@ -9,7 +9,7 @@ import { v4 as uuid } from "uuid";
 import { graphqlHTTP } from "express-graphql";
 
 import { schema, resolvers } from "./graphql/index.js";
-import auth from "./middlewares/auth.js";
+import authMiddleware from "./middlewares/auth.js";
 import { clearImage } from "./util/file.js";
 
 import connect from "./config/mongo.js";
@@ -50,7 +50,7 @@ app.use(
   })
 );
 
-app.use(auth);
+app.use(authMiddleware);
 
 app.put("/post-image", (req, res, next) => {
   if (!req.isAuth) {
