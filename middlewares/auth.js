@@ -6,7 +6,7 @@ const authMiddleware = (req, res, next) => {
     req.isAuth = false;
     return next();
   }
-  const { _, token } = authHeader.split(" ")[1];
+  const [_, token] = authHeader.split(" ")[1];
   let decodedToken;
 
   try {
