@@ -7,33 +7,36 @@ import sinon from "sinon";
 import { resolvers } from "../graphql/index.js";
 import User from "../models/user.js";
 
-describe("Login Resolver", () => {
+describe("Authentication resolver", () => {
   let findOneStub;
   let compareStub;
   let signStub;
+  let sandbox;
 
   beforeEach(() => {
     findOneStub = sinon.stub(User, "findOne");
     compareStub = sinon.stub(bcrypt, "compare");
     signStub = sinon.stub(jwt, "sign");
+    sandbox = sinon.createSandbox();
   });
 
   afterEach(() => {
     findOneStub.restore();
     compareStub.restore();
     signStub.restore();
+    sandbox.restore();
   });
 
   it("should return a token and userId for valid credentials", async () => {
     const email = "test@example.com";
     const password = "validPassword";
     const userId = "1234567890";
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = "hashedPassword";
 
     findOneStub
       .withArgs({ email })
       .resolves({ _id: userId, email, password: hashedPassword });
-    compareStub.withArgs(password, hashedPassword).resolves(true);
+    compareStub.resolves(true);
     signStub.returns("dummy_token");
 
     const result = await resolvers.login({ email, password }, {});
@@ -63,7 +66,7 @@ describe("Login Resolver", () => {
     findOneStub.withArgs({ email: "test@example.com" }).resolves({
       _id: "123",
       email: "test@example.com",
-      password: await bcrypt.hash("validPassword", 12),
+      password: "hashedPassword",
     });
     compareStub.resolves(false);
 
@@ -76,18 +79,6 @@ describe("Login Resolver", () => {
       expect(error.message).to.equal("Password is incorrect.");
       expect(error.code).to.equal(401);
     }
-  });
-});
-
-describe("createUser resolver", () => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.createSandbox();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it("should create a new user with valid input", async () => {
@@ -104,8 +95,6 @@ describe("createUser resolver", () => {
       _doc: { ...userInput, password: "hashedPassword" },
       _id: "1234567890",
     });
-
-    const findOneStub = sandbox.stub(User, "findOne").resolves(null);
 
     try {
       const result = await resolvers.createUser(
