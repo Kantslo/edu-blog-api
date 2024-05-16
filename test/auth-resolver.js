@@ -8,22 +8,13 @@ import { resolvers } from "../graphql/index.js";
 import User from "../models/user.js";
 
 describe("Authentication resolver", () => {
-  let findOneStub;
-  let compareStub;
-  let signStub;
   let sandbox;
 
   beforeEach(() => {
-    findOneStub = sinon.stub(User, "findOne");
-    compareStub = sinon.stub(bcrypt, "compare");
-    signStub = sinon.stub(jwt, "sign");
     sandbox = sinon.createSandbox();
   });
 
   afterEach(() => {
-    findOneStub.restore();
-    compareStub.restore();
-    signStub.restore();
     sandbox.restore();
   });
 
@@ -33,11 +24,12 @@ describe("Authentication resolver", () => {
     const userId = "1234567890";
     const hashedPassword = "hashedPassword";
 
-    findOneStub
+    const findOneStub = sandbox
+      .stub(User, "findOne")
       .withArgs({ email })
       .resolves({ _id: userId, email, password: hashedPassword });
-    compareStub.resolves(true);
-    signStub.returns("dummy_token");
+    const compareStub = sandbox.stub(bcrypt, "compare").resolves(true);
+    const signStub = sandbox.stub(jwt, "sign").returns("dummy_token");
 
     const result = await resolvers.login({ email, password }, {});
 
@@ -49,7 +41,10 @@ describe("Authentication resolver", () => {
   });
 
   it("should throw an error if user is not found", async () => {
-    findOneStub.withArgs({ email: "nonexistent@example.com" }).resolves(null);
+    const findOneStub = sandbox
+      .stub(User, "findOne")
+      .withArgs({ email: "nonexistent@example.com" })
+      .resolves(null);
 
     try {
       await resolvers.login(
@@ -63,12 +58,15 @@ describe("Authentication resolver", () => {
   });
 
   it("should throw an error if password is incorrect", async () => {
-    findOneStub.withArgs({ email: "test@example.com" }).resolves({
-      _id: "123",
-      email: "test@example.com",
-      password: "hashedPassword",
-    });
-    compareStub.resolves(false);
+    const findOneStub = sandbox
+      .stub(User, "findOne")
+      .withArgs({ email: "test@example.com" })
+      .resolves({
+        _id: "123",
+        email: "test@example.com",
+        password: "hashedPassword",
+      });
+    const compareStub = sandbox.stub(bcrypt, "compare").resolves(false);
 
     try {
       await resolvers.login(
@@ -95,6 +93,7 @@ describe("Authentication resolver", () => {
       _doc: { ...userInput, password: "hashedPassword" },
       _id: "1234567890",
     });
+    const findOneStub = sandbox.stub(User, "findOne");
 
     try {
       const result = await resolvers.createUser(
