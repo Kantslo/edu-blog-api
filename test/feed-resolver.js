@@ -5,7 +5,6 @@ import mongoose from "mongoose";
 import { resolvers } from "../graphql/index.js";
 
 import User from "../models/user.js";
-import Post from "../models/post.js";
 
 describe("Feed resolver", () => {
   let sandbox;
@@ -74,4 +73,6 @@ describe("Feed resolver", () => {
       expect(err.code).to.equal(401);
     }
   });
+
+  it("", async () => {});
 });
