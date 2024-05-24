@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { resolvers } from "../graphql/index.js";
 
 import User from "../models/user.js";
+import Post from "../models/post.js";
 
 describe("Feed resolver", () => {
   let sandbox;
@@ -74,5 +75,24 @@ describe("Feed resolver", () => {
     }
   });
 
-  it("", async () => {});
+  it("should throw and error with code 422 if title and content are invalid", async () => {
+    const args = {
+      postInput: {
+        title: "a",
+        content: "b",
+        imageUrl: "test imageUrl",
+      },
+      id: "testId",
+    };
+    const req = {
+      isAuth: true,
+    };
+
+    try {
+      await resolvers.updatePost(args, req);
+    } catch (err) {
+      expect(err).to.have.property("code", 422);
+      expect(err.data).to.have.length(2);
+    }
+  });
 });
